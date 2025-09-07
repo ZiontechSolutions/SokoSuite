@@ -3,21 +3,23 @@ version: '3.9'
 services:
   app:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: sokosuite_app
     restart: unless-stopped
     tty: true
     working_dir: /var/www
     volumes:
-      - .:/var/www
-      - ./vendor:/var/www/vendor
-      - ./node_modules:/var/www/node_modules
-    networks:
-      - sokosuite_network
+      - ./backend:/var/www
+      - ./backend/vendor:/var/www/vendor
+      - ./backend/node_modules:/var/www/node_modules
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
     depends_on:
       - db
       - redis
+    networks:
+      - sokosuite_network
 
   db:
     image: postgres:15
@@ -45,13 +47,13 @@ services:
 
   horizon:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: sokosuite_horizon
     restart: unless-stopped
     command: php artisan horizon
     volumes:
-      - .:/var/www
+      - ./backend:/var/www
     depends_on:
       - app
       - redis
